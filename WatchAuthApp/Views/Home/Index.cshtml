@@ -1,0 +1,79 @@
+﻿@model WatchAuthApp.ViewModels.AppViewModel
+@{
+    ViewBag.Title = "Home";
+}
+
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Get))
+{
+    <div id="filters" class="row">
+        <div class="col-6">
+            @Html.EditorFor(x=>Model.Search,null, new { htmlAttibutes = new { @class = "form-control", placeholder = "Search by movie title" } } )
+
+        </div>
+        <div class="col-2">
+            @Html.DropDownListFor(x=>x.Category,(SelectList)ViewBag.Categories,"Choose Category", new { @class = "form-control" })
+        </div>
+        <div class="col-2">
+            @Html.EnumDropDownListFor(x=>x.SortBy, new { @class="form-control"})
+        </div>
+
+        <div class="col-2">
+            <button type="submit" class="btn btn-primary btn-block">Search</button>
+        </div>
+    </div>
+
+}
+   
+    @foreach (var item in Model.Movies)
+    {
+        <div class="row movie">
+            <div class="col-md-10">
+                <p>@item.Title</p>
+            </div>
+            <div class="col-md-2">
+                @if (Model.FavoriteMovies.Contains(item.Id))
+                {
+                    <button class="btn"><i id="@item.Id "class="fas fa-heart"></i></button>
+                }
+                else
+                {
+                    <button class="btn"><i id="@item.Id "class="far fa-heart"></i></button>
+                }
+            </div>
+
+        </div>
+    }
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $(".fa-heart").click(function (e) {
+                $.ajax({
+                    method: 'POST',
+                    url: '/Home/ToggleFavorite/',
+                    data: {
+                        movieid: e.target.id
+                    },
+                    success: function (response) {
+                        console.log("Success");
+                        console.log(response);
+                        if (response) {
+                            e.target.classList.remove('far');
+                            e.target.classList.add('fas');
+                            
+                        }
+                        else {
+                            e.target.classList.remove('fas');
+                            e.target.classList.add('far');
+                        }
+                    },
+                    error: function (response) {
+                        console.log("error");
+                        console.log(response);
+                       
+                    }
+                })
+            });
+        });
+    </script>
+    }
